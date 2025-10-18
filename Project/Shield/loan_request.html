@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://public-frontend-cos.metadl.com/mgx/img/favicon.png" type="image/png">
+    <title>Emergency Loan Request - M-Shield</title>
+    <link rel="stylesheet" href="./static/style.css">
+</head>
+<body class="loan-body">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="container">
+            <div class="header-left">
+                <button class="btn btn-outline btn-sm" onclick="window.location.href='/dashboard'">← Back</button>
+                <h1 class="logo">🛡️ M-Shield</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="user-email">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="loan-main">
+        <div class="container">
+            <!-- Loan Request Form -->
+            <section class="loan-request-section">
+                <div class="loan-header">
+                    <h2>🚨 Emergency Loan Request</h2>
+                    <p>Our AI will analyze your request and provide instant approval for genuine emergencies</p>
+                </div>
+
+                <div class="loan-content">
+                    <!-- Step 1: Request Details -->
+                    <div id="step-1" class="loan-step active">
+                        <div class="step-header">
+                            <div class="step-number">1</div>
+                            <h3>Tell us about your emergency</h3>
+                        </div>
+                        
+                        <form id="loan-request-form" class="loan-form">
+                            <div class="form-group">
+                                <label for="loan-amount">How much do you need? (KES)</label>
+                                <input type="number" id="loan-amount" min="100" step="50" required>
+                                <div class="available-amount">
+                                    Available for loan: <span id="max-loan-amount">KES 0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="loan-reason">Describe your emergency</label>
+                                <textarea id="loan-reason" rows="4" 
+                                    placeholder="e.g., Hospital bill for mama, School fees for my child, Phone repair for work"
+                                    required></textarea>
+                                <div class="form-hint">
+                                    Be specific - our AI uses this to determine if it's a genuine emergency
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-full">
+                                Analyze with AI 🤖
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: AI Analysis -->
+                    <div id="step-2" class="loan-step">
+                        <div class="step-header">
+                            <div class="step-number">2</div>
+                            <h3>AI Analysis Results</h3>
+                        </div>
+                        
+                        <div class="ai-analysis" id="ai-analysis">
+                            <!-- AI results will be shown here -->
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Loan Approval -->
+                    <div id="step-3" class="loan-step">
+                        <div class="step-header">
+                            <div class="step-number">3</div>
+                            <h3>Loan Approved!</h3>
+                        </div>
+                        
+                        <div class="loan-approval" id="loan-approval">
+                            <!-- Loan details will be shown here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loan Guidelines -->
+            <section class="loan-guidelines">
+                <h3>💡 How Shielded Loans Work</h3>
+                <div class="guidelines-grid">
+                    <div class="guideline-item">
+                        <div class="guideline-icon">🛡️</div>
+                        <div class="guideline-content">
+                            <h4>From Your Own Savings</h4>
+                            <p>You can borrow up to 80% of your total savings. No external debt!</p>
+                        </div>
+                    </div>
+                    <div class="guideline-item">
+                        <div class="guideline-icon">🤖</div>
+                        <div class="guideline-content">
+                            <h4>AI-Powered Approval</h4>
+                            <p>Our AI instantly recognizes genuine emergencies vs non-essential requests</p>
+                        </div>
+                    </div>
+                    <div class="guideline-item">
+                        <div class="guideline-icon">⚡</div>
+                        <div class="guideline-content">
+                            <h4>Instant Transfer</h4>
+                            <p>Approved loans are transferred to your M-Pesa within 5 minutes</p>
+                        </div>
+                    </div>
+                    <div class="guideline-item">
+                        <div class="guideline-icon">📅</div>
+                        <div class="guideline-content">
+                            <h4>Flexible Repayment</h4>
+                            <p>30-day repayment period with just 5% interest that goes back to your savings</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Emergency Categories -->
+            <section class="emergency-categories">
+                <h3>🎯 What Qualifies as an Emergency?</h3>
+                <div class="categories-grid">
+                    <div class="category-card emergency">
+                        <div class="category-icon">🏥</div>
+                        <h4>Medical</h4>
+                        <p>Hospital bills, medicine, doctor visits, surgery</p>
+                        <div class="category-badge">High Priority</div>
+                    </div>
+                    <div class="category-card emergency">
+                        <div class="category-icon">🎓</div>
+                        <h4>Education</h4>
+                        <p>School fees, exam fees, educational materials</p>
+                        <div class="category-badge">High Priority</div>
+                    </div>
+                    <div class="category-card emergency">
+                        <div class="category-icon">👨‍👩‍👧‍👦</div>
+                        <h4>Family Emergency</h4>
+                        <p>Funeral expenses, urgent family matters</p>
+                        <div class="category-badge">High Priority</div>
+                    </div>
+                    <div class="category-card moderate">
+                        <div class="category-icon">🔧</div>
+                        <h4>Essential Repairs</h4>
+                        <p>Phone repair, car repair, house maintenance</p>
+                        <div class="category-badge">Moderate Priority</div>
+                    </div>
+                    <div class="category-card low">
+                        <div class="category-icon">🛍️</div>
+                        <h4>Non-Emergency</h4>
+                        <p>Shopping, entertainment, non-essential items</p>
+                        <div class="category-badge">Low Priority</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Analyzing your request with AI...</p>
+    </div>
+
+    <script src="./static/script.js"></script>
+    <script>
+        // Initialize loan request page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!isAuthenticated()) {
+                window.location.href = '/';
+                return;
+            }
+            loadLoanRequestPage();
+        });
+    </script>
+</body>
+</html>

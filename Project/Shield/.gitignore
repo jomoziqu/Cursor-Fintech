@@ -1,0 +1,8 @@
+# Python cache and compiled files
+__pycache__/
+venv/
+env/
+*.db
+prompt.txt
+*.md
+*.pkl
