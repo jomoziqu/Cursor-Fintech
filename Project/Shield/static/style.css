@@ -1469,3 +1469,99 @@ h1, h2, h3, h4, h5, h6 {
         transform: translate3d(0,-4px,0);
     }
 }
+
+/* Goal Preview Component */
+.goal-preview {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+    animation: slideDown 0.3s ease-out;
+}
+
+.preview-header {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.preview-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.preview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.preview-row span:first-child {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.preview-row span:last-child {
+    color: #212529;
+    font-weight: 600;
+}
+
+.preview-total {
+    border-top: 1px solid #dee2e6;
+    padding-top: 8px;
+    margin-top: 4px;
+}
+
+.preview-total span:last-child {
+    color: #28a745;
+    font-size: 16px;
+}
+
+.preview-progress {
+    margin-top: 8px;
+}
+
+.preview-progress .progress-bar {
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.preview-progress .progress {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    transition: width 0.3s ease;
+}
+
+.preview-progress .progress-text {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: center;
+    display: block;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form Help Text */
+.form-help {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #6c757d;
+    line-height: 1.4;
+}

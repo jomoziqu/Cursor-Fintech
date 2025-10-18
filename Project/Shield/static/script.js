@@ -228,6 +228,9 @@ async function loadDashboard() {
         // Load recent transactions
         await loadRecentTransactions();
         
+        // Load AI insights
+        await loadAIInsights();
+        
         hideLoading();
     } catch (error) {
         hideLoading();
@@ -340,6 +343,194 @@ async function loadRecentTransactions() {
     }
 }
 
+async function loadAIInsights() {
+    try {
+        // Get all necessary data for insights
+        const [transactions, goals, loans, balance] = await Promise.all([
+            apiCall('/transactions'),
+            apiCall('/savings/goals'),
+            apiCall('/loans'),
+            apiCall('/savings/balance')
+        ]);
+        
+        // Calculate insights
+        const insights = calculateAIInsights(transactions, goals, loans, balance);
+        
+        // Update the insights section
+        updateInsightsDisplay(insights);
+        
+    } catch (error) {
+        console.error('Failed to load AI insights:', error);
+        // Show default insights if data loading fails
+        updateInsightsDisplay(getDefaultInsights());
+    }
+}
+
+function calculateAIInsights(transactions, goals, loans, balance) {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    // Filter recent transactions (last 30 days)
+    const recentTransactions = transactions.filter(t => 
+        new Date(t.timestamp) >= thirtyDaysAgo
+    );
+    
+    // Calculate spending patterns
+    const loanRequests = recentTransactions.filter(t => t.transaction_type === 'loan');
+    const nonEmergencyLoans = loanRequests.filter(t => 
+        t.category && !['medical', 'family_emergency', 'school_fees'].includes(t.category)
+    );
+    const emergencyLoans = loanRequests.filter(t => 
+        t.category && ['medical', 'family_emergency', 'school_fees'].includes(t.category)
+    );
+    
+    // Calculate goal progress
+    const activeGoals = goals.filter(g => g.is_active);
+    const totalTargetAmount = activeGoals.reduce((sum, goal) => sum + goal.target_amount, 0);
+    const totalCurrentAmount = activeGoals.reduce((sum, goal) => sum + goal.current_amount, 0);
+    const overallProgress = totalTargetAmount > 0 ? (totalCurrentAmount / totalTargetAmount) * 100 : 0;
+    
+    // Calculate savings rate (average monthly savings)
+    const savingsTransactions = recentTransactions.filter(t => t.transaction_type === 'savings');
+    const totalSavings = savingsTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const monthlySavingsRate = totalSavings; // Already filtered to last 30 days
+    
+    // Calculate time to reach goals
+    const primaryGoal = activeGoals.find(g => g.goal_name.toLowerCase().includes('emergency')) || 
+                       activeGoals[0] || { target_amount: 10000, current_amount: 0 };
+    const remainingAmount = primaryGoal.target_amount - primaryGoal.current_amount;
+    const monthsToGoal = monthlySavingsRate > 0 ? Math.ceil(remainingAmount / monthlySavingsRate) : 0;
+    
+    // Calculate shield strength
+    const availableForLoans = balance.loan_eligible_amount;
+    const activeLoanAmount = loans.filter(l => l.status === 'active')
+                                 .reduce((sum, l) => sum + l.amount, 0);
+    const netShieldStrength = availableForLoans - activeLoanAmount;
+    
+    return {
+        spendingPattern: {
+            avoidedNonEmergency: nonEmergencyLoans.length,
+            emergencyLoans: emergencyLoans.length,
+            totalLoanRequests: loanRequests.length
+        },
+        goalProgress: {
+            overallProgress: Math.round(overallProgress),
+            monthsToGoal: monthsToGoal,
+            primaryGoalName: primaryGoal.goal_name || 'Emergency Fund',
+            monthlySavingsRate: monthlySavingsRate
+        },
+        shieldStrength: {
+            availableAmount: netShieldStrength,
+            totalSavings: balance.total_savings,
+            activeLoans: activeLoanAmount
+        }
+    };
+}
+
+function updateInsightsDisplay(insights) {
+    const insightsGrid = document.querySelector('.insights-grid');
+    if (!insightsGrid) return;
+    
+    insightsGrid.innerHTML = `
+        <div class="insight-card">
+            <div class="insight-icon">📊</div>
+            <div class="insight-content">
+                <h4>Spending Pattern</h4>
+                <p>${getSpendingPatternText(insights.spendingPattern)}</p>
+            </div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon">🎯</div>
+            <div class="insight-content">
+                <h4>Goal Progress</h4>
+                <p>${getGoalProgressText(insights.goalProgress)}</p>
+            </div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon">🛡️</div>
+            <div class="insight-content">
+                <h4>Shield Strength</h4>
+                <p>${getShieldStrengthText(insights.shieldStrength)}</p>
+            </div>
+        </div>
+    `;
+}
+
+function getSpendingPatternText(spendingPattern) {
+    const { avoidedNonEmergency, emergencyLoans, totalLoanRequests } = spendingPattern;
+    
+    if (totalLoanRequests === 0) {
+        return "No loan requests this month. You're maintaining good financial discipline!";
+    }
+    
+    if (avoidedNonEmergency === 0 && emergencyLoans > 0) {
+        return `You've made ${emergencyLoans} emergency loan${emergencyLoans > 1 ? 's' : ''} this month. Your financial shield is protecting you when you need it most.`;
+    }
+    
+    if (avoidedNonEmergency > 0) {
+        return `Great job! You've avoided ${avoidedNonEmergency} non-emergency request${avoidedNonEmergency > 1 ? 's' : ''} this month, showing excellent financial discipline.`;
+    }
+    
+    return `You've made ${totalLoanRequests} loan request${totalLoanRequests > 1 ? 's' : ''} this month. Consider reviewing your spending patterns.`;
+}
+
+function getGoalProgressText(goalProgress) {
+    const { overallProgress, monthsToGoal, primaryGoalName, monthlySavingsRate } = goalProgress;
+    
+    if (overallProgress >= 100) {
+        return `Congratulations! You've reached your ${primaryGoalName} goal! Consider setting a new target.`;
+    }
+    
+    if (monthsToGoal === 0) {
+        return `You're ${overallProgress}% towards your ${primaryGoalName} goal. Keep up the great work!`;
+    }
+    
+    if (monthlySavingsRate > 0) {
+        return `At your current savings rate of ${formatCurrency(monthlySavingsRate)}/month, you'll reach your ${primaryGoalName} goal in ${monthsToGoal} month${monthsToGoal > 1 ? 's' : ''}.`;
+    }
+    
+    return `You're ${overallProgress}% towards your ${primaryGoalName} goal. Start saving to reach your target faster!`;
+}
+
+function getShieldStrengthText(shieldStrength) {
+    const { availableAmount, totalSavings, activeLoans } = shieldStrength;
+    
+    if (availableAmount <= 0) {
+        return `Your financial shield is currently depleted. Focus on building your savings to restore protection.`;
+    }
+    
+    if (availableAmount < 5000) {
+        return `Your financial shield can protect against emergencies up to ${formatCurrency(availableAmount)}. Consider increasing your savings.`;
+    }
+    
+    if (availableAmount >= 5000 && availableAmount < 15000) {
+        return `Your financial shield is strong! You can handle emergencies up to ${formatCurrency(availableAmount)}.`;
+    }
+    
+    return `Excellent! Your financial shield is very strong at ${formatCurrency(availableAmount)}, providing robust protection against emergencies.`;
+}
+
+function getDefaultInsights() {
+    return {
+        spendingPattern: {
+            avoidedNonEmergency: 0,
+            emergencyLoans: 0,
+            totalLoanRequests: 0
+        },
+        goalProgress: {
+            overallProgress: 0,
+            monthsToGoal: 0,
+            primaryGoalName: 'Emergency Fund',
+            monthlySavingsRate: 0
+        },
+        shieldStrength: {
+            availableAmount: 0,
+            totalSavings: 0,
+            activeLoans: 0
+        }
+    };
+}
+
 // Modal Functions for Dashboard
 function showAddSavings() {
     populateSavingsGoalDropdown();
@@ -362,6 +553,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const description = document.getElementById('savings-description').value;
             const goalId = document.getElementById('savings-goal').value;
             
+            // Validate goal selection
+            if (!goalId) {
+                showError('Please select a savings goal to contribute to.');
+                return;
+            }
+            
+            // Validate amount
+            if (amount <= 0) {
+                showError('Please enter a valid amount greater than 0.');
+                return;
+            }
+            
             showLoading('Adding to your savings...');
             
             try {
@@ -377,10 +580,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 hideLoading();
                 closeModal('add-savings-modal');
-                showSuccess(`Successfully added ${formatCurrency(amount)} to your savings!`);
+                showSuccess(`Successfully added ${formatCurrency(amount)} to your selected goal!`);
                 
                 // Reload dashboard data
                 await loadBalanceInfo();
+                await loadSavingsGoals();
                 await loadRecentTransactions();
                 
                 // Reset form
@@ -739,9 +943,18 @@ function populateSavingsGoalDropdown() {
         if (goals.length === 0) {
             select.innerHTML = '<option value="">No active goals found</option>';
         } else {
-            select.innerHTML = goals.map(goal =>
-                `<option value="${goal.id}">${goal.goal_name} (${formatCurrency(goal.current_amount)} / ${formatCurrency(goal.target_amount)})</option>`
-            ).join('');
+            select.innerHTML = goals.map(goal => {
+                const remaining = goal.target_amount - goal.current_amount;
+                const progress = Math.round(goal.progress);
+                const status = progress >= 100 ? '✅ Complete' : 
+                              progress >= 75 ? '🟢 Almost there' : 
+                              progress >= 50 ? '🟡 Halfway' : '🔴 Getting started';
+                
+                return `<option value="${goal.id}">
+                    ${goal.goal_name} - ${status} (${formatCurrency(goal.current_amount)} / ${formatCurrency(goal.target_amount)}) 
+                    ${remaining > 0 ? `- Need ${formatCurrency(remaining)}` : ''}
+                </option>`;
+            }).join('');
         }
     }).catch(() => {
         select.innerHTML = '<option value="">Failed to load goals</option>';
@@ -751,4 +964,82 @@ function populateSavingsGoalDropdown() {
 function showAddSavings() {
     populateSavingsGoalDropdown();
     showModal('add-savings-modal');
+    
+    // Add event listener for goal selection preview
+    const goalSelect = document.getElementById('savings-goal');
+    const amountInput = document.getElementById('savings-amount');
+    
+    if (goalSelect && amountInput) {
+        // Remove existing listeners
+        goalSelect.removeEventListener('change', updateGoalPreview);
+        amountInput.removeEventListener('input', updateGoalPreview);
+        
+        // Add new listeners
+        goalSelect.addEventListener('change', updateGoalPreview);
+        amountInput.addEventListener('input', updateGoalPreview);
+    }
+}
+
+function updateGoalPreview() {
+    const goalSelect = document.getElementById('savings-goal');
+    const amountInput = document.getElementById('savings-amount');
+    
+    if (!goalSelect || !amountInput) return;
+    
+    const selectedGoalId = goalSelect.value;
+    const amount = parseFloat(amountInput.value) || 0;
+    
+    // Remove existing preview
+    const existingPreview = document.getElementById('goal-preview');
+    if (existingPreview) {
+        existingPreview.remove();
+    }
+    
+    if (selectedGoalId && amount > 0) {
+        // Get goal data from the selected option
+        const selectedOption = goalSelect.options[goalSelect.selectedIndex];
+        const optionText = selectedOption.textContent;
+        
+        // Extract current amount and target amount from option text
+        const match = optionText.match(/\(([^)]+)\)/);
+        if (match) {
+            const amounts = match[1].split(' / ');
+            if (amounts.length === 2) {
+                const currentAmount = parseFloat(amounts[0].replace(/[^\d.]/g, ''));
+                const targetAmount = parseFloat(amounts[1].replace(/[^\d.]/g, ''));
+                const newAmount = currentAmount + amount;
+                const newProgress = Math.min((newAmount / targetAmount) * 100, 100);
+                
+                const preview = document.createElement('div');
+                preview.id = 'goal-preview';
+                preview.className = 'goal-preview';
+                preview.innerHTML = `
+                    <div class="preview-header">📊 Contribution Preview</div>
+                    <div class="preview-details">
+                        <div class="preview-row">
+                            <span>Current:</span>
+                            <span>${formatCurrency(currentAmount)}</span>
+                        </div>
+                        <div class="preview-row">
+                            <span>Adding:</span>
+                            <span>+${formatCurrency(amount)}</span>
+                        </div>
+                        <div class="preview-row preview-total">
+                            <span>New Total:</span>
+                            <span>${formatCurrency(newAmount)}</span>
+                        </div>
+                        <div class="preview-progress">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${newProgress}%"></div>
+                            </div>
+                            <span class="progress-text">${Math.round(newProgress)}% complete</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert after the goal select
+                goalSelect.parentNode.insertBefore(preview, goalSelect.parentNode.lastElementChild);
+            }
+        }
+    }
 }
