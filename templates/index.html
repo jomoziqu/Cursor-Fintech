@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://public-frontend-cos.metadl.com/mgx/img/favicon.png" type="image/png">
+    <title>M-Shield - Your Financial Immune System</title>
+    <link rel="stylesheet" href="./static/style.css">
+</head>
+<body>
+    <!-- Landing Page -->
+    <div id="landing-page" class="page active">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="logo">
+                    <h1>🛡️ M-Shield</h1>
+                    <span class="tagline">Your Financial Immune System</span>
+                </div>
+                <nav class="nav">
+                    <button class="btn btn-outline" onclick="showLogin()">Login</button>
+                    <button class="btn btn-primary" onclick="showRegister()">Get Started</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Stop "Fake Uhuru" from 
+                        <span class="gradient-text">Destroying Your Dreams</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Build your financial immune system with AI-powered emergency funds. 
+                        Get instant loans from your own savings when real emergencies strike.
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-number">92%</div>
+                            <div class="stat-label">AI Accuracy</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">KES 15K</div>
+                            <div class="stat-label">Avg Emergency Fund</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">< 5min</div>
+                            <div class="stat-label">Loan Approval</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-hero" onclick="showRegister()">
+                        Start Building Your Shield
+                        <span class="btn-icon">🚀</span>
+                    </button>
+                </div>
+                <div class="hero-visual">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="app-preview">
+                                <div class="preview-header">
+                                    <div class="balance-card">
+                                        <h3>Emergency Fund</h3>
+                                        <div class="balance">KES 12,450</div>
+                                        <div class="progress-bar">
+                                            <div class="progress" style="width: 83%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ai-alert">
+                                    <div class="alert-icon">🤖</div>
+                                    <div class="alert-text">
+                                        <strong>AI Analysis:</strong> "Hospital bill" detected as medical emergency (94% confidence)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <h2 class="section-title">How M-Shield Protects You</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧠</div>
+                        <h3>AI-Powered Detection</h3>
+                        <p>Our smart AI instantly recognizes real emergencies vs "fake uhuru" requests with 92% accuracy.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Shielded Loans</h3>
+                        <p>Borrow from your own savings instantly. No credit checks, no external debt, just smart protection.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>M-Pesa Integration</h3>
+                        <p>Seamless integration with PayHero and M-Pesa for instant transfers and automated savings.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Goal Protection</h3>
+                        <p>Keep your savings goals on track while still helping family in genuine emergencies.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problem Section -->
+        <section class="problem">
+            <div class="container">
+                <div class="problem-content">
+                    <h2>The Kenyan Reality</h2>
+                    <div class="problem-stats">
+                        <div class="problem-stat">
+                            <div class="stat-big">65%</div>
+                            <p>of Kenyans can't raise KES 10,000 in an emergency</p>
+                        </div>
+                        <div class="problem-stat">
+                            <div class="stat-big">33%</div>
+                            <p>face medical emergencies as their biggest financial shock</p>
+                        </div>
+                        <div class="problem-stat">
+                            <div class="stat-big">KES 68K</div>
+                            <p>average annual education costs per child</p>
+                        </div>
+                    </div>
+                    <p class="problem-text">
+                        Every Kenyan knows the struggle: family and friends constantly asking for money, 
+                        genuine emergencies that wipe out savings, and the pressure to help even when it 
+                        derails your own financial goals. M-Shield changes this dynamic.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Welcome Back</h2>
+                <button class="close-btn" onclick="closeModal('login-modal')">&times;</button>
+            </div>
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Login</button>
+            </form>
+            <p class="auth-switch">
+                Don't have an account? <a href="#" onclick="switchToRegister()">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Start Your Financial Protection</h2>
+                <button class="close-btn" onclick="closeModal('register-modal')">&times;</button>
+            </div>
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-phone">Phone Number</label>
+                    <input type="tel" id="register-phone" placeholder="0712345678" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+            </form>
+            <p class="auth-switch">
+                Already have an account? <a href="#" onclick="switchToLogin()">Login</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Setting up your financial shield...</p>
+    </div>
+
+    <script src="./static/script.js"></script>
+</body>
+</html>
